@@ -86,7 +86,7 @@ export class NakoCompiler {
   private lexer: NakoLexer
   private dependencies: Dependencies
   private usedFuncs: Set<string>
-  private codeGenerateor: {[key: string]: any}
+  private codeGenerateor: {[key: string]: { type: 'isTest'|'opts', gen: any } }
   protected logger: NakoLogger
   protected eventList: NakoEvent[]
   // global objects
@@ -761,12 +761,17 @@ export class NakoCompiler {
     if (!genObj) {
       throw new Error(`コードジェネレータの「${mode}」はサポートされていません。`)
     }
-    return genObj.generate(this, ast, opt.isTest)
+    return genObj.gen.generate(this, ast, genObj.type === 'isTest' ? opt.isTest : opt)
   }
 
-  /** コードジェネレータを追加する */
+  /** コードジェネレータ(isTestバージョン)を追加する */
   addCodeGenerator (mode: string, obj: any) {
-    this.codeGenerateor[mode] = obj
+    this.codeGenerateor[mode] = { type: 'isTest', gen: obj }
+  }
+
+  /** コードジェネレータ(OPTSバージョン)を追加する */
+  addCodeGenerator2 (mode: string, obj: any) {
+    this.codeGenerateor[mode] = { type: 'opts', gen: obj }
   }
 
   /** (非推奨)
